@@ -23,6 +23,15 @@ read S3Bucket
 echo -n "Enter CMK ARN created from above > "
 read CMKArn
 
+echo -n "Enter name for stack in Test account> "
+read TestStackName
+
+echo -n "Enter name for stack in Prod account> "
+read ProdStackName
+
+echo -n "Enter email for Primary approval> "
+read PrimaryApproval
+
 echo -n "Executing in DEV Account"
 aws cloudformation deploy --stack-name toolsacct-codepipeline-role --template-file DevAccount/toolsacct-codepipeline-codecommit.yaml --capabilities CAPABILITY_NAMED_IAM --parameter-overrides ToolsAccount=$ToolsAccount CMKARN=$CMKArn --profile $DevAccountProfile
 
@@ -34,7 +43,7 @@ aws cloudformation deploy --stack-name toolsacct-codepipeline-cloudformation-rol
 
 
 echo -n "Creating Pipeline in Tools Account"
-aws cloudformation deploy --stack-name sample-lambda-pipeline --template-file ToolsAcct/code-pipeline.yaml --parameter-overrides DevAccount=$DevAccount TestAccount=$TestAccount ProductionAccount=$ProdAccount CMKARN=$CMKArn S3Bucket=$S3Bucket --capabilities CAPABILITY_NAMED_IAM --profile $ToolsAccountProfile
+aws cloudformation deploy --stack-name sample-lambda-pipeline --template-file ToolsAcct/code-pipeline.yaml --parameter-overrides DevAccount=$DevAccount TestAccount=$TestAccount ProductionAccount=$ProdAccount CMKARN=$CMKArn S3Bucket=$S3Bucket ProdStackName=$ProdStackName TestStackName=$TestStackName PrimaryApproval=$PrimaryApproval --capabilities CAPABILITY_NAMED_IAM --profile $ToolsAccountProfile
 
 echo -n "Adding Permissions to the CMK"
 aws cloudformation deploy --stack-name pre-reqs --template-file ToolsAcct/pre-reqs.yaml --parameter-overrides CodeBuildCondition=true --profile $ToolsAccountProfile
